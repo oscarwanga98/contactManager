@@ -1,7 +1,7 @@
 const asyncHandler=require("express-async-handler")
 const jwt=require('jsonwebtoken')
 
-const validateToken=asyncHandler((req,res,next)=>{
+const validateToken=asyncHandler(async(req,res,next)=>{
     let token;
 
     let authHeader = req.headers.Authorization || req.headers.authorization;
@@ -10,10 +10,15 @@ const validateToken=asyncHandler((req,res,next)=>{
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err,decode)=>{
             if(err){
                 res.send(401)
-                throw new Error('Usr not authorised')
+                throw new Error('User not authorised')
             }
-            console.log(decode)
+            req.user=decode.user
+            next()
         });
+        if(!token){
+            res.status(401)
+            throw new Error('User not authorised or mising token')
+        }
     }
 
 })
